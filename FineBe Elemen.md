@@ -8,13 +8,13 @@
 ``Win:CreateTab("Home")``
 
 ## FineBe Button
-    ``:CreateButton("Mulai", function() print("Start") end)``
+``:CreateButton("Mulai", function() print("Start") end)``
 
 ## FineBe Toggle
 ``:CreateToggle("AutoFarm", false, function(v) print("AutoFarm:", v) end)``
 ## FineBe DropDown
-    ``:CreateDropdown("Mode", {"Easy","Hard"}, function(v) print("Mode:", v) end)``
+``:CreateDropdown("Mode", {"Easy","Hard"}, function(v) print("Mode:", v) end)``
 ## FineBe Slider
 ``:CreateSlider("Speed", 0, 100, 16, function(v) print("Speed:", v) end)``
 ## FineBe TextBox
-    ``:CreateTextBox("Masukkan Nama", function(v) print("Nama:", v) end)``
+``:CreateTextBox("Masukkan Nama", function(v) print("Nama:", v) end)``
