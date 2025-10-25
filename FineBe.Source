@@ -1,0 +1,207 @@
+local FineBe = {}
+
+local Theme = {
+	Main = Color3.fromRGB(25,25,25),
+	Accent = Color3.fromRGB(255,60,60),
+	Text = Color3.fromRGB(255,255,255),
+	Corner = UDim.new(0,8)
+}
+
+local function MakeDraggable(topbar, frame)
+	local dragging, dragStart, startPos
+	topbar.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			dragStart = input.Position
+			startPos = frame.Position
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then dragging = false end
+			end)
+		end
+	end)
+	game:GetService("UserInputService").InputChanged:Connect(function(input)
+		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+			local delta = input.Position - dragStart
+			frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		end
+	end)
+end
+
+function FineBe:CreateWindow(title)
+	local gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+	gui.Name = "FineBeUI"
+
+	local main = Instance.new("Frame", gui)
+	main.Size = UDim2.new(0,500,0,400)
+	main.Position = UDim2.new(0.5,-250,0.5,-200)
+	main.BackgroundColor3 = Theme.Main
+	Instance.new("UICorner", main).CornerRadius = Theme.Corner
+
+	local top = Instance.new("TextLabel", main)
+	top.Size = UDim2.new(1,0,0,38)
+	top.BackgroundColor3 = Theme.Accent
+	top.TextColor3 = Theme.Text
+	top.Font = Enum.Font.SourceSansBold
+	top.Text = title or "FineBe"
+	top.TextSize = 20
+	Instance.new("UICorner", top).CornerRadius = Theme.Corner
+
+	local tabbar = Instance.new("Frame", main)
+	tabbar.Size = UDim2.new(0,140,1,-38)
+	tabbar.Position = UDim2.new(0,0,0,38)
+	tabbar.BackgroundColor3 = Color3.fromRGB(35,35,35)
+	Instance.new("UICorner", tabbar).CornerRadius = Theme.Corner
+
+	local content = Instance.new("Frame", main)
+	content.Size = UDim2.new(1,-150,1,-38)
+	content.Position = UDim2.new(0,150,0,38)
+	content.BackgroundTransparency = 1
+
+	local layout = Instance.new("UIListLayout", tabbar)
+	layout.Padding = UDim.new(0,6)
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+	MakeDraggable(top, main)
+
+	local window = {}
+
+	function window:CreateTab(name)
+		local tabButton = Instance.new("TextButton", tabbar)
+		tabButton.Size = UDim2.new(1,-10,0,30)
+		tabButton.BackgroundColor3 = Theme.Accent
+		tabButton.Text = name
+		tabButton.TextColor3 = Theme.Text
+		tabButton.Font = Enum.Font.SourceSans
+		tabButton.TextSize = 16
+		Instance.new("UICorner", tabButton).CornerRadius = Theme.Corner
+
+		local tabFrame = Instance.new("ScrollingFrame", content)
+		tabFrame.Size = UDim2.new(1,0,1,0)
+		tabFrame.Visible = false
+		tabFrame.CanvasSize = UDim2.new(0,0,0,0)
+		tabFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+		tabFrame.ScrollBarThickness = 6
+
+		local tabLayout = Instance.new("UIListLayout", tabFrame)
+		tabLayout.Padding = UDim.new(0,8)
+
+		tabButton.MouseButton1Click:Connect(function()
+			for _,v in pairs(content:GetChildren()) do
+				if v:IsA("ScrollingFrame") then v.Visible = false end
+			end
+			tabFrame.Visible = true
+		end)
+
+		local tab = {}
+
+		function tab:CreateButton(text, callback)
+			local btn = Instance.new("TextButton", tabFrame)
+			btn.Size = UDim2.new(1,-10,0,32)
+			btn.BackgroundColor3 = Theme.Accent
+			btn.TextColor3 = Theme.Text
+			btn.Font = Enum.Font.SourceSansBold
+			btn.TextSize = 16
+			btn.Text = text
+			Instance.new("UICorner", btn).CornerRadius = Theme.Corner
+			btn.MouseButton1Click:Connect(callback)
+			return tab
+		end
+
+		function tab:CreateToggle(text, default, callback)
+			local toggle = Instance.new("TextButton", tabFrame)
+			toggle.Size = UDim2.new(1,-10,0,32)
+			toggle.BackgroundColor3 = Color3.fromRGB(50,50,50)
+			toggle.TextColor3 = Theme.Text
+			toggle.Font = Enum.Font.SourceSansBold
+			toggle.TextSize = 16
+			local state = default
+			toggle.Text = text.." : "..(state and "ON" or "OFF")
+			Instance.new("UICorner", toggle).CornerRadius = Theme.Corner
+			toggle.MouseButton1Click:Connect(function()
+				state = not state
+				toggle.Text = text.." : "..(state and "ON" or "OFF")
+				callback(state)
+			end)
+			return tab
+		end
+
+		function tab:CreateDropdown(text, list, callback)
+			local dropBtn = Instance.new("TextButton", tabFrame)
+			dropBtn.Size = UDim2.new(1,-10,0,32)
+			dropBtn.BackgroundColor3 = Theme.Accent
+			dropBtn.TextColor3 = Theme.Text
+			dropBtn.Font = Enum.Font.SourceSansBold
+			dropBtn.TextSize = 16
+			dropBtn.Text = text
+			Instance.new("UICorner", dropBtn).CornerRadius = Theme.Corner
+
+			local dropFrame = Instance.new("Frame", tabFrame)
+			dropFrame.Visible = false
+			dropFrame.BackgroundTransparency = 1
+			local dropLayout = Instance.new("UIListLayout", dropFrame)
+			dropLayout.Padding = UDim.new(0,4)
+
+			for _,v in ipairs(list) do
+				local opt = Instance.new("TextButton", dropFrame)
+				opt.Size = UDim2.new(1,-10,0,28)
+				opt.BackgroundColor3 = Color3.fromRGB(50,50,50)
+				opt.TextColor3 = Theme.Text
+				opt.Text = v
+				opt.Font = Enum.Font.SourceSans
+				opt.TextSize = 16
+				Instance.new("UICorner", opt).CornerRadius = Theme.Corner
+				opt.MouseButton1Click:Connect(function()
+					dropBtn.Text = text..": "..v
+					dropFrame.Visible = false
+					callback(v)
+				end)
+			end
+
+			dropBtn.MouseButton1Click:Connect(function()
+				dropFrame.Visible = not dropFrame.Visible
+			end)
+			return tab
+		end
+
+		function tab:CreateSlider(text, min, max, default, callback)
+			local frame = Instance.new("Frame", tabFrame)
+			frame.Size = UDim2.new(1,-10,0,40)
+			frame.BackgroundColor3 = Color3.fromRGB(50,50,50)
+			Instance.new("UICorner", frame).CornerRadius = Theme.Corner
+
+			local label = Instance.new("TextLabel", frame)
+			label.Size = UDim2.new(1,0,0,20)
+			label.BackgroundTransparency = 1
+			label.TextColor3 = Theme.Text
+			label.Font = Enum.Font.SourceSans
+			label.TextSize = 16
+			label.Text = text.." : "..default
+
+			callback(default)
+			return tab
+		end
+
+		function tab:CreateTextBox(placeholder, callback)
+			local box = Instance.new("TextBox", tabFrame)
+			box.Size = UDim2.new(1,-10,0,32)
+			box.BackgroundColor3 = Color3.fromRGB(45,45,45)
+			box.PlaceholderText = placeholder
+			box.Text = ""
+			box.TextColor3 = Theme.Text
+			box.Font = Enum.Font.SourceSans
+			box.TextSize = 16
+			Instance.new("UICorner", box).CornerRadius = Theme.Corner
+			box.FocusLost:Connect(function()
+				callback(box.Text)
+			end)
+			return tab
+		end
+
+		if #content:GetChildren() == 1 then tabFrame.Visible = true end
+		return tab
+	end
+
+	return window
+end
+
+return FineBe
