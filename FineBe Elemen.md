@@ -1,5 +1,5 @@
 # FineBe Loadstring
-``local FineBe = loadstring(game:HttpGet("https://raw.githubusercontent.com/USERNAME/FineBe/main/FineBe.lua"))()``
+``local FineBe = loadstring(game:HttpGet("https://raw.githubusercontent.com/arkanzulfadliputra-oss/FineBe/refs/heads/main/FineBe.Source"))()``
 
 ## FineBe Window
 ``local Win = FineBe:CreateWindow("FineBe Executor")``
